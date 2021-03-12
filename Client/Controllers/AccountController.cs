@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Client.Helpers;
 using Client.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,15 @@ namespace Client.Controllers
         public async Task<IActionResult> Register(RegisterModel model)
         {
             if (!ModelState.IsValid) return View(model);
+
             
+            if (await ApiUtilities.CheckIfFieldExists(
+                $"{_config["BaseApiUrl"]}api/Account/emailexists?email={model.Email}"))
+            {
+                ModelState.AddModelError(string.Empty, $"{model.Email} is already in use");
+                return View(model);
+            }
+
             var stringContent = new StringContent(JsonConvert.SerializeObject(model),
                 Encoding.UTF8, "application/json");
 
@@ -90,26 +99,9 @@ namespace Client.Controllers
                 return RedirectToAction("Index", "home");
             }
 
-            ModelState.AddModelError(String.Empty, "invalid registration attempt");
+            ModelState.AddModelError(string.Empty, "invalid registration attempt");
             return View(model);
         }
-
-
-
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> CheckEmailExists(string email)
-        {
-            var client = new HttpClient();
-           
-            var responseString =  await client.GetStringAsync($"{_config["BaseApiUrl"]}/api/Account/emailexists&email={email}");
-
-            bool result = JsonConvert.DeserializeObject<bool>(responseString);
-
-            if (result)
-                return Json(true);
-            return Json($"specified  address :  {email} is already in use");
-
-        }
+   
     }
 }

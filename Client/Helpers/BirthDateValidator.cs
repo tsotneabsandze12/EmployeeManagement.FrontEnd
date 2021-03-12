@@ -9,7 +9,7 @@ namespace Client.Helpers
         public BirthDateValidator(int minimumAge)
         {
             _minimumAge = minimumAge;
-            ErrorMessage = $"minimum of {_minimumAge} is required";
+            ErrorMessage = $"minimum age of {_minimumAge} is required";
         }
 
 

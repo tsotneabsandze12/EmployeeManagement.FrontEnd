@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Client.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Client.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -145,6 +146,18 @@ namespace Client.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
+            if (await ApiUtilities.CheckIfFieldExists($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={model.PersonalId}"))
+            {
+                ModelState.AddModelError(string.Empty, $"{model.PersonalId} belongs to someone else");
+                return View(model);
+            }
+            
+            if (await ApiUtilities.CheckIfFieldExists($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={model.PhoneNumber}"))
+            {
+                ModelState.AddModelError(string.Empty, $"{model.PhoneNumber} belongs to someone else");
+                return View(model);
+            }
+
             var token = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
@@ -182,35 +195,30 @@ namespace Client.Controllers
             return positions;
         }
 
-        [HttpGet]
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> CheckIfPersonalIdExists(string personalId)
-        {
-            var client = new HttpClient();
-            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
-
-            var result = JsonConvert.DeserializeObject<bool>(responseString);
-
-            if (result)
-                return Json(true);
-            return Json($"specified  personal Id :  {personalId} belongs to someone else");
-
-        }
-        [HttpGet]
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> CheckIfPhoneNumberExists(string phone)
-        {
-            var client = new HttpClient();
-            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
-
-            var result = JsonConvert.DeserializeObject<bool>(responseString);
-
-            if (result)
-                return Json(true);
-            return Json($"specified  phone number :  {phone} is already in use");
-
-        }
+        
+        // [HttpGet]
+        // [HttpPost]
+        // public async Task<IActionResult> CheckIfPersonalIdExists(string personalId)
+        // {
+        //     var client = new HttpClient();
+        //     var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
+        //
+        //     var result = JsonConvert.DeserializeObject<bool>(responseString);
+        //
+        //     return result ? Json(true) : Json(false);
+        // }
+        //
+        //
+        // [HttpGet]
+        // [HttpPost]
+        // public async Task<IActionResult> CheckIfPhoneNumberExists(string phone)
+        // {
+        //     var client = new HttpClient();
+        //     var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
+        //
+        //     var result = JsonConvert.DeserializeObject<bool>(responseString);
+        //
+        //     return result ? Json(true) : Json(false);
+        // }
     }
 }

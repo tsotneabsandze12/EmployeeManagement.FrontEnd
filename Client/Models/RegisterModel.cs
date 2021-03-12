@@ -26,9 +26,7 @@ namespace Client.Models
         public DateTime? BirthDate { get; set; }
 
 
-        //,ErrorMessage ="email is already in use"
         [Required]
-        [Remote("CheckEmailExists", "Account")]
         [EmailAddress]
         [RegularExpression(@"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")]
         public string Email { get; set; }
