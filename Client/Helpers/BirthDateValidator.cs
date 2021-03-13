@@ -21,7 +21,11 @@ namespace Client.Helpers
                 return true;
 
             if (DateTime.TryParse(input.ToString(), out var date))
-                return  date.AddYears(_minimumAge) < DateTime.Now && (DateTime.Now.Year - date.Year) < 100;
+            {
+                var res = date.AddYears(_minimumAge) < DateTime.Now && (DateTime.Now.Year - date.Year) < 100;
+                return res;
+            }
+
 
             return false;
         }

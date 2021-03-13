@@ -6,14 +6,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Client.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Client.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Client.Helpers;
 
 namespace Client.Controllers
 {
@@ -108,7 +107,7 @@ namespace Client.Controllers
 
         }
 
-        //httpDelete
+
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -131,40 +130,92 @@ namespace Client.Controllers
         public async Task<IActionResult> AddEmployee()
         {
             var positions = await GetPositionsAsync();
-            ViewBag.Positions = positions.Select(n => new SelectListItem
+            var employee = new AddEmployeeModel
             {
-                Value = n.Id.ToString(),
-                Text = n.Name
-            }).ToList();
+                Positions = positions.EntityToSelectListItems()
+            };
 
-
-            return View();
+            return View(employee);
         }
 
         [HttpPost]
         public async Task<IActionResult> AddEmployee(AddEmployeeModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-            
+            if (ModelState.IsValid)
+            {
+                var token = HttpContext.Session.GetString("token");
+
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var stringContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+
+                var result = await client.PostAsync($"{_config["BaseApiUrl"]}api/Employees/add", stringContent);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            ModelState.AddModelError(string.Empty, "invalid attempt");
+            var positions = await GetPositionsAsync();
+            model.Positions = positions.EntityToSelectListItems();
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditEmployee(int id)
+        {
+
             var token = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
 
-            var stringContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-
-            var result = await client.PostAsync($"{_config["BaseApiUrl"]}api/Employees/add", stringContent);
-
-            if (result.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                return RedirectToAction(nameof(Index));
+                var stringContent = await response.Content.ReadAsStringAsync();
+                var employeeToEdit = JsonConvert.DeserializeObject<EditEmployeeModel>(stringContent);
+
+
+                var positions = await GetPositionsAsync();
+                employeeToEdit.Positions = positions.EntityToSelectListItems();
+
+
+                return View(employeeToEdit);
             }
 
-            //error handling
             return Redirect("https://www.google.com/search?q=not+found&sxsrf=ALeKk03yzk1gLRw4BSkLd5GG6qZEbHGZdw:1615479505263&source=lnms&tbm=isch&sa=X&ved=2ahUKEwidg7aQ0qjvAhUEzoUKHanUBk4Q_AUoAXoECBQQAw&biw=1366&bih=663#imgrc=uOy188n5ILXlUM");
         }
 
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEmployee(int id, EditEmployeeModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = HttpContext.Session.GetString("token");
+
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var stringContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+
+                var response = await client.PutAsync($"{_config["BaseApiUrl"]}api/Employees/update/{id}", stringContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Details), new { id = id });
+                }
+            }
+
+
+            ModelState.AddModelError(string.Empty, "invalid update attempt");
+            return View(model);
+        }
+
         [HttpGet]
         public async Task<IReadOnlyList<PositionModel>> GetPositionsAsync()
         {
@@ -183,7 +234,6 @@ namespace Client.Controllers
             return positions;
         }
 
-
         [HttpGet]
         [HttpPost(Name = "CheckIfPersonalIdExists")]
         public async Task<JsonResult> CheckIfPersonalIdExists([FromForm(Name = "vm.data.PersonalId")] string personalId)
@@ -193,7 +243,7 @@ namespace Client.Controllers
 
             var result = JsonConvert.DeserializeObject<bool>(responseString);
 
-            return result  ? Json($"personal id {personalId}  belongs to someone else") : Json(true);
+            return result ? Json($"personal id {personalId}  belongs to someone else") : Json(true);
         }
 
 
@@ -206,7 +256,7 @@ namespace Client.Controllers
 
             var result = JsonConvert.DeserializeObject<bool>(responseString);
 
-            return result  ? Json($"phone number {phone}  belongs to someone else") : Json(true);
+            return result ? Json($"phone number {phone}  belongs to someone else") : Json(true);
         }
     }
 }

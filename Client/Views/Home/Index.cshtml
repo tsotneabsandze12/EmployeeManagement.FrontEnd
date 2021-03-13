@@ -33,8 +33,7 @@
 
 
                     <a asp-controller="home" asp-action="details" asp-route-id="@emp.Id" class="btn btn-primary">View</a>
-                    <a asp-controller="home" asp-action="" asp-route-id="@emp.Id" class="btn btn-primary">Edit</a>
-                    @* edit *@
+                    <a asp-controller="home" asp-action="EditEmployee" asp-route-id="@emp.Id" class="btn btn-primary">Edit</a>
                     <a asp-controller="home" asp-action="Delete" asp-route-id="@emp.Id" class="btn btn-danger">Delete</a>
                 </div>
 

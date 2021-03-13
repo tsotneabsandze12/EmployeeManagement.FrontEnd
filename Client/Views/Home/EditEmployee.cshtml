@@ -1,23 +1,20 @@
-@model AddEmployeeModel
+﻿@model EditEmployeeModel
 
 @{
-    ViewData["Title"] = "AddEmployee";
+    ViewData["Title"] = "EditEmployee";
 }
 
-<h1>Add Employee</h1>
-
-
+<h4>Update Employee</h4>
 
 <hr />
 <div class="row">
     <div class="col-md-4">
         <div asp-validation-summary="All" class="text-danger"></div>
-        <form asp-action="AddEmployee" method="post">
+        <form asp-action="EditEmployee">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="PersonalId" class="control-label"></label>
-                <input asp-for="PersonalId" class="form-control" 
-                       />
+                <input asp-for="PersonalId" class="form-control" />
                 <span asp-validation-for="PersonalId" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -33,7 +30,6 @@
             <div class="form-group">
                 <label asp-for="Gender"></label>
                 <select asp-for="Gender" asp-items="@Html.GetEnumSelectList<GenderEnum>()" class="form-control">
-                    <option selected="selected" value="">Pick one</option>
                 </select>
                 <span asp-validation-for="Gender" class="text-danger"></span>
             </div>
@@ -45,10 +41,10 @@
             <div class="form-group">
                 <label asp-for="Status"></label>
                 <select asp-for="Status" asp-items="@Html.GetEnumSelectList<StatusEnum>()" class="form-control">
-                    <option selected="selected" value="">Pick one</option>
                 </select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="DateReleased" class="control-label"></label>
                 <input type="date" asp-for="DateReleased" class="form-control" />
@@ -62,12 +58,11 @@
             <div class="form-group">
                 <label asp-for="PositionId" class="control-label">Position</label>
                 <select class="form-control" asp-for="PositionId" asp-items="@Model.Positions">
-                    <option value="">Pick one</option>
                 </select>
                 <span asp-validation-for="PositionId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -76,7 +71,5 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
-
 
 
