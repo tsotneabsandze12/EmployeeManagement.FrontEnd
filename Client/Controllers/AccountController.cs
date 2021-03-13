@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Client.Helpers;
 using Client.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -72,14 +73,7 @@ namespace Client.Controllers
         public async Task<IActionResult> Register(RegisterModel model)
         {
             if (!ModelState.IsValid) return View(model);
-
             
-            if (await ApiUtilities.CheckIfFieldExists(
-                $"{_config["BaseApiUrl"]}api/Account/emailexists?email={model.Email}"))
-            {
-                ModelState.AddModelError(string.Empty, $"{model.Email} is already in use");
-                return View(model);
-            }
 
             var stringContent = new StringContent(JsonConvert.SerializeObject(model),
                 Encoding.UTF8, "application/json");
@@ -92,7 +86,7 @@ namespace Client.Controllers
             {
                 var contentString = await response.Content.ReadAsStringAsync();
 
-                ApiAuthResponse data = JsonConvert.DeserializeObject<ApiAuthResponse>(contentString);
+                var data = JsonConvert.DeserializeObject<ApiAuthResponse>(contentString);
 
                 HttpContext.Session.SetString("token", data.Token);
 
@@ -103,5 +97,17 @@ namespace Client.Controllers
             return View(model);
         }
    
+        [HttpGet]
+        [HttpPost]
+        public async Task<JsonResult> CheckEmail(string email)
+        {
+            var client = new HttpClient();
+            
+            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Account/emailexists?email={email}");
+
+            var result = JsonConvert.DeserializeObject<bool>(responseString);
+
+            return result ?  Json($"email {email}  belongs to someone else") : Json(true);
+        }
     }
 }

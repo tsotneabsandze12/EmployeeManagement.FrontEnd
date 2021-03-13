@@ -145,19 +145,7 @@ namespace Client.Controllers
         public async Task<IActionResult> AddEmployee(AddEmployeeModel model)
         {
             if (!ModelState.IsValid) return View(model);
-
-            if (await ApiUtilities.CheckIfFieldExists($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={model.PersonalId}"))
-            {
-                ModelState.AddModelError(string.Empty, $"{model.PersonalId} belongs to someone else");
-                return View(model);
-            }
             
-            if (await ApiUtilities.CheckIfFieldExists($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={model.PhoneNumber}"))
-            {
-                ModelState.AddModelError(string.Empty, $"{model.PhoneNumber} belongs to someone else");
-                return View(model);
-            }
-
             var token = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
@@ -195,30 +183,30 @@ namespace Client.Controllers
             return positions;
         }
 
-        
-        // [HttpGet]
-        // [HttpPost]
-        // public async Task<IActionResult> CheckIfPersonalIdExists(string personalId)
-        // {
-        //     var client = new HttpClient();
-        //     var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
-        //
-        //     var result = JsonConvert.DeserializeObject<bool>(responseString);
-        //
-        //     return result ? Json(true) : Json(false);
-        // }
-        //
-        //
-        // [HttpGet]
-        // [HttpPost]
-        // public async Task<IActionResult> CheckIfPhoneNumberExists(string phone)
-        // {
-        //     var client = new HttpClient();
-        //     var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
-        //
-        //     var result = JsonConvert.DeserializeObject<bool>(responseString);
-        //
-        //     return result ? Json(true) : Json(false);
-        // }
+
+        [HttpGet]
+        [HttpPost(Name = "CheckIfPersonalIdExists")]
+        public async Task<JsonResult> CheckIfPersonalIdExists([FromForm(Name = "vm.data.PersonalId")] string personalId)
+        {
+            var client = new HttpClient();
+            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
+
+            var result = JsonConvert.DeserializeObject<bool>(responseString);
+
+            return result  ? Json($"personal id {personalId}  belongs to someone else") : Json(true);
+        }
+
+
+        [HttpGet]
+        [HttpPost]
+        public async Task<JsonResult> CheckIfPhoneNumberExists(string phone)
+        {
+            var client = new HttpClient();
+            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
+
+            var result = JsonConvert.DeserializeObject<bool>(responseString);
+
+            return result  ? Json($"phone number {phone}  belongs to someone else") : Json(true);
+        }
     }
 }
