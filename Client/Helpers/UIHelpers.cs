@@ -9,7 +9,7 @@ namespace Client.Helpers
     public static class UiHelpers
     {
         public static List<SelectListItem> EntityToSelectListItems(
-            this IReadOnlyList<dynamic> entities)
+            this IEnumerable<dynamic> entities)
         {
             return entities.Select(x => new SelectListItem
             {

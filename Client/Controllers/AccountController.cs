@@ -1,11 +1,8 @@
-using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Client.Helpers;
 using Client.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;

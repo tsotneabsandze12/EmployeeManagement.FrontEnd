@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -30,21 +31,12 @@ namespace Client.Controllers
         {
             ViewBag.Filters = new ArrayList
             {
-               firstName,
-               lastName
+                firstName,
+                lastName
             };
 
-            try
-            {
-
-                var employees = await GetEmployeesAsync(firstName, lastName);
-                return View(employees);
-            }
-            catch (Exception)
-            {
-                // some error view thingy needs to be done here 
-                return Redirect("https://stackoverflow.com/questions/22626837/how-to-connect-multiple-virtual-machines-in-lan");
-            }
+            var employees = await GetEmployeesAsync(firstName, lastName);
+            return View(employees);
         }
 
         [HttpGet]
@@ -55,11 +47,11 @@ namespace Client.Controllers
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees?FirstName={firstName}&LastName={lastName}");
+            var response =
+                await client.GetAsync(
+                    $"{_config["BaseApiUrl"]}api/Employees?FirstName={firstName}&LastName={lastName}");
 
-
-            if (!response.IsSuccessStatusCode) throw new Exception(nameof(response));
-
+            
             var dataString = await response.Content.ReadAsStringAsync();
             var employees = JsonConvert.DeserializeObject<IReadOnlyList<EmployeeModel>>(dataString);
 
@@ -69,16 +61,19 @@ namespace Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            //error handling needs to  be implemented here
             var jwt = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
 
-            var strContent = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
+            var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
+
+            if (!response.IsSuccessStatusCode) return View("EmployeeNotFound", id);
+
+
+            var strContent = await response.Content.ReadAsStringAsync();
 
             var employee = JsonConvert.DeserializeObject<EmployeeModel>(strContent);
-
 
             return View(employee);
         }
@@ -86,25 +81,19 @@ namespace Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-
             var token = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var content = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
+            var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
 
-            if (content.IsSuccessStatusCode)
-            {
-                var stringContent = await content.Content.ReadAsStringAsync();
-                var employeeToDelete = JsonConvert.DeserializeObject<EmployeeModel>(stringContent);
+            if (!response.IsSuccessStatusCode) return View("EmployeeNotFound", id);
 
-                return View(employeeToDelete);
-            }
+            var stringContent = await response.Content.ReadAsStringAsync();
+            var employeeToDelete = JsonConvert.DeserializeObject<EmployeeModel>(stringContent);
 
-            // error handling here as well
-            return Redirect("https://www.google.com/search?q=not+found&sxsrf=ALeKk03yzk1gLRw4BSkLd5GG6qZEbHGZdw:1615479505263&source=lnms&tbm=isch&sa=X&ved=2ahUKEwidg7aQ0qjvAhUEzoUKHanUBk4Q_AUoAXoECBQQAw&biw=1366&bih=663#imgrc=uOy188n5ILXlUM");
-
+            return View(employeeToDelete);
         }
 
 
@@ -118,12 +107,7 @@ namespace Client.Controllers
 
             var res = await client.DeleteAsync($"{_config["BaseApiUrl"]}api/Employees/delete/{id}");
 
-            if (res.IsSuccessStatusCode)
-                return RedirectToAction(nameof(Index));
-
-
-            // error handling here as well
-            return Redirect("https://www.google.com/search?q=not+found&sxsrf=ALeKk03yzk1gLRw4BSkLd5GG6qZEbHGZdw:1615479505263&source=lnms&tbm=isch&sa=X&ved=2ahUKEwidg7aQ0qjvAhUEzoUKHanUBk4Q_AUoAXoECBQQAw&biw=1366&bih=663#imgrc=uOy188n5ILXlUM");
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -148,14 +132,14 @@ namespace Client.Controllers
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                var stringContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                var stringContent =
+                    new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
                 var result = await client.PostAsync($"{_config["BaseApiUrl"]}api/Employees/add", stringContent);
 
                 if (result.IsSuccessStatusCode)
-                {
                     return RedirectToAction(nameof(Index));
-                }
+                
             }
 
             ModelState.AddModelError(string.Empty, "invalid attempt");
@@ -168,27 +152,23 @@ namespace Client.Controllers
         [HttpGet]
         public async Task<IActionResult> EditEmployee(int id)
         {
-
             var token = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var stringContent = await response.Content.ReadAsStringAsync();
-                var employeeToEdit = JsonConvert.DeserializeObject<EditEmployeeModel>(stringContent);
+            if (!response.IsSuccessStatusCode) return View("EmployeeNotFound", id);
+            
+            var stringContent = await response.Content.ReadAsStringAsync();
+            var employeeToEdit = JsonConvert.DeserializeObject<EditEmployeeModel>(stringContent);
 
 
-                var positions = await GetPositionsAsync();
-                employeeToEdit.Positions = positions.EntityToSelectListItems();
+            var positions = await GetPositionsAsync();
+            employeeToEdit.Positions = positions.EntityToSelectListItems();
 
 
-                return View(employeeToEdit);
-            }
-
-            return Redirect("https://www.google.com/search?q=not+found&sxsrf=ALeKk03yzk1gLRw4BSkLd5GG6qZEbHGZdw:1615479505263&source=lnms&tbm=isch&sa=X&ved=2ahUKEwidg7aQ0qjvAhUEzoUKHanUBk4Q_AUoAXoECBQQAw&biw=1366&bih=663#imgrc=uOy188n5ILXlUM");
+            return View(employeeToEdit);
         }
 
         [HttpPost]
@@ -201,13 +181,15 @@ namespace Client.Controllers
 
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var stringContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                var stringContent =
+                    new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
-                var response = await client.PutAsync($"{_config["BaseApiUrl"]}api/Employees/update/{id}", stringContent);
+                var response =
+                    await client.PutAsync($"{_config["BaseApiUrl"]}api/Employees/update/{id}", stringContent);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToAction(nameof(Details), new { id = id });
+                    return RedirectToAction(nameof(Details), new {id = id});
                 }
             }
 
@@ -236,10 +218,13 @@ namespace Client.Controllers
 
         [HttpGet]
         [HttpPost(Name = "CheckIfPersonalIdExists")]
-        public async Task<JsonResult> CheckIfPersonalIdExists([FromForm(Name = "vm.data.PersonalId")] string personalId)
+        public async Task<JsonResult> CheckIfPersonalIdExists([FromForm(Name = "vm.data.PersonalId")]
+            string personalId)
         {
             var client = new HttpClient();
-            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
+            var responseString =
+                await client.GetStringAsync(
+                    $"{_config["BaseApiUrl"]}api/Employees/personalIdExists?personalId={personalId}");
 
             var result = JsonConvert.DeserializeObject<bool>(responseString);
 
@@ -252,7 +237,8 @@ namespace Client.Controllers
         public async Task<JsonResult> CheckIfPhoneNumberExists(string phone)
         {
             var client = new HttpClient();
-            var responseString = await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
+            var responseString =
+                await client.GetStringAsync($"{_config["BaseApiUrl"]}api/Employees/phoneExists?number={phone}");
 
             var result = JsonConvert.DeserializeObject<bool>(responseString);
 

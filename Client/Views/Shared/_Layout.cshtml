@@ -63,11 +63,10 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
 
-    @*@await RenderSectionAsync("scripts", required: false)*@
 
     @if (IsSectionDefined("Scripts"))
     {
-        @RenderSection("Scripts", required: true)
+        @await RenderSectionAsync("Scripts", required: true)
     }
 
 </body>
