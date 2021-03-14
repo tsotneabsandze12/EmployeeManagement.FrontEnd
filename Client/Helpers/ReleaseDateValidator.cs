@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Client.Helpers
 {
-    public class ReleaseDateValidator: ValidationAttribute
+    public class ReleaseDateValidator : ValidationAttribute
     {
         public ReleaseDateValidator()
         {
@@ -23,5 +23,4 @@ namespace Client.Helpers
             return false;
         }
     }
-    
 }

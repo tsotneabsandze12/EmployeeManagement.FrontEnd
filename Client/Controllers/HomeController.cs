@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -10,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Client.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Client.Helpers;
@@ -51,7 +48,7 @@ namespace Client.Controllers
                 await client.GetAsync(
                     $"{_config["BaseApiUrl"]}api/Employees?FirstName={firstName}&LastName={lastName}");
 
-            
+
             var dataString = await response.Content.ReadAsStringAsync();
             var employees = JsonConvert.DeserializeObject<IReadOnlyList<EmployeeModel>>(dataString);
 
@@ -61,6 +58,7 @@ namespace Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
+            throw new Exception();
             var jwt = HttpContext.Session.GetString("token");
 
             var client = new HttpClient();
@@ -139,7 +137,6 @@ namespace Client.Controllers
 
                 if (result.IsSuccessStatusCode)
                     return RedirectToAction(nameof(Index));
-                
             }
 
             ModelState.AddModelError(string.Empty, "invalid attempt");
@@ -159,7 +156,7 @@ namespace Client.Controllers
             var response = await client.GetAsync($"{_config["BaseApiUrl"]}api/Employees/get/{id}");
 
             if (!response.IsSuccessStatusCode) return View("EmployeeNotFound", id);
-            
+
             var stringContent = await response.Content.ReadAsStringAsync();
             var employeeToEdit = JsonConvert.DeserializeObject<EditEmployeeModel>(stringContent);
 

@@ -8,7 +8,7 @@
 
 
 @{
-    string value = (Model.DateReleased == null) ? "n/a" : ((DateTime)Model.DateReleased).ToString("dd-MM-yy", DateTimeFormatInfo.InvariantInfo);
+    string value = (Model.DateReleased == null) ? "n/a" : ((DateTime) Model.DateReleased).ToString("dd-MM-yy", DateTimeFormatInfo.InvariantInfo);
 }
 
 <div class="row justify-content-center m-3">
@@ -29,8 +29,7 @@
 
             <a asp-controller="home" asp-action="index" class="btn btn-primary">Back</a>
 
-            @* <a asp-controller="home" asp-action="edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> *@
-            <a asp-controller="home" asp-action="Delete" asp-route-id="@Model.Id"  class="btn btn-danger">Delete</a>
+            <a asp-controller="home" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
         </div>
     </div>
 </div>

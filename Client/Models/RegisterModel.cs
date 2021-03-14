@@ -9,14 +9,11 @@ namespace Client.Models
 {
     public class RegisterModel
     {
-        [MaxLength(11)]
-        public string PersonalId { get; set; }
+        [MaxLength(11)] public string PersonalId { get; set; }
 
-        [Required]
-        public string FirstName { get; set; }
+        [Required] public string FirstName { get; set; }
 
-        [Required]
-        public string LastName { get; set; }
+        [Required] public string LastName { get; set; }
 
 
         public GenderEnum? Gender { get; set; }
@@ -28,8 +25,9 @@ namespace Client.Models
 
         [Required]
         [EmailAddress]
-        [Remote("CheckEmail","Account")]
-        [RegularExpression(@"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")]
+        [Remote("CheckEmail", "Account")]
+        [RegularExpression(
+            @"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")]
         public string Email { get; set; }
 
 

@@ -8,9 +8,9 @@ namespace Client.Models
         [EmailAddress]
         [RegularExpression(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$")]
         public string Email { get; set; }
-        
-        
-        [Required]
+
+
+        [Required] 
         [MinLength(6)]
         public string Password { get; set; }
     }

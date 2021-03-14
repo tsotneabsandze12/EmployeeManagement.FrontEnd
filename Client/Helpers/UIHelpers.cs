@@ -15,7 +15,7 @@ namespace Client.Helpers
             {
                 Value = x.Id.ToString(),
                 Text = x.Name
-            }).ToList();    
+            }).ToList();
         }
     }
 }

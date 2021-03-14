@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Client.Helpers
 {
-    public class BirthDateValidator: ValidationAttribute
+    public class BirthDateValidator : ValidationAttribute
     {
         private readonly int _minimumAge;
+
         public BirthDateValidator(int minimumAge)
         {
             _minimumAge = minimumAge;
@@ -21,14 +22,9 @@ namespace Client.Helpers
                 return true;
 
             if (DateTime.TryParse(input.ToString(), out var date))
-            {
-                var res = date.AddYears(_minimumAge) < DateTime.Now && (DateTime.Now.Year - date.Year) < 100;
-                return res;
-            }
-
+                return date.AddYears(_minimumAge) < DateTime.Now && (DateTime.Now.Year - date.Year) < 100;
 
             return false;
         }
     }
-    
 }

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +16,19 @@ namespace Client.Controllers
             
             return View("NotFound");
         }
-
+        
+        [Route("/Error")]
+        public IActionResult Error()
+        {
+            var details = HttpContext.Features
+                .Get<IExceptionHandlerPathFeature>();
+        
+            ViewBag.ExPath = details.Path;
+            ViewBag.ExMessage = details.Error.Message;
+            ViewBag.StackTrace = details.Error.StackTrace;
+            
+            return View("Error");
+        }
         
     }
 }

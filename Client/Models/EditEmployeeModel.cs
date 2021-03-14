@@ -11,13 +11,12 @@ namespace Client.Models
 {
     public class EditEmployeeModel
     {
-
         [MaxLength(11)]
         [Remote("CheckIfPersonalIdExists", "Home")]
         [RegularExpression(@"^([1-9]\d{10})?$", ErrorMessage = "Invalid format for personal id field")]
         public string PersonalId { get; set; }
 
-        public string FirstName { get; set; }   
+        public string FirstName { get; set; }
 
         public string LastName { get; set; }
 
@@ -30,8 +29,7 @@ namespace Client.Models
         public StatusEnum Status { get; set; }
 
 
-        [ReleaseDateValidator]
-        public DateTime? DateReleased { get; set; }
+        [ReleaseDateValidator] public DateTime? DateReleased { get; set; }
 
         [Phone]
         [MaxLength(9)]
@@ -41,7 +39,6 @@ namespace Client.Models
         public int PositionId { get; set; }
 
 
-        [JsonIgnore]
-        public List<SelectListItem> Positions { get; set; }
+        [JsonIgnore] public List<SelectListItem> Positions { get; set; }
     }
 }

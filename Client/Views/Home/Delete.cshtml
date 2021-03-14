@@ -6,7 +6,7 @@
 <h1>Delete</h1>
 
 @{
-    string value = (Model.DateReleased == null) ? "n/a" : ((DateTime)Model.DateReleased).ToString("dd-MM-yy", DateTimeFormatInfo.InvariantInfo);
+    string value = (Model.DateReleased == null) ? "n/a" : ((DateTime) Model.DateReleased).ToString("dd-MM-yy", DateTimeFormatInfo.InvariantInfo);
 }
 
 <div class="row justify-content-center m-3">
@@ -28,12 +28,7 @@
             <a asp-controller="home" asp-action="index" class="btn btn-primary">Back</a>
 
             <form asp-action="Delete">
-                @*method="post"*@
-                @*<button asp-controller="home" 
-                        type="submit" asp-action="delete"
-                        asp-route-id="@Model.Id" 
-                        class="btn btn-danger">Delete</button>*@
-                <input type="submit" value="Delete" class="btn btn-danger" />
+                <input type="submit" value="Delete" class="btn btn-danger"/>
             </form>
         </div>
     </div>
